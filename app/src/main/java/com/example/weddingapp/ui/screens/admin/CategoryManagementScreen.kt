@@ -3,19 +3,23 @@ package com.example.weddingapp.ui.screens.admin
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Label
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.weddingapp.data.model.Category
 import com.example.weddingapp.data.repository.CategoryRepository
 
@@ -25,6 +29,7 @@ fun CategoryManagementScreen(onBack: () -> Unit) {
     val categories by CategoryRepository.getCategories().collectAsState(initial = emptyList())
     var showAddDialog by remember { mutableStateOf(false) }
     var newCatName by remember { mutableStateOf("") }
+    var newCatImageUrl by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -63,25 +68,40 @@ fun CategoryManagementScreen(onBack: () -> Unit) {
                 onDismissRequest = { showAddDialog = false },
                 title = { Text("Thêm loại đồ mới") },
                 text = {
-                    OutlinedTextField(
-                        value = newCatName,
-                        onValueChange = { newCatName = it },
-                        label = { Text("Tên danh mục") },
-                        placeholder = { Text("Ví dụ: Áo dài, Phụ kiện...") }
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedTextField(
+                            value = newCatName,
+                            onValueChange = { newCatName = it },
+                            label = { Text("Tên danh mục") },
+                            placeholder = { Text("Ví dụ: Áo dài, Phụ kiện...") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        OutlinedTextField(
+                            value = newCatImageUrl,
+                            onValueChange = { newCatImageUrl = it },
+                            label = { Text("Link ảnh danh mục") },
+                            placeholder = { Text("https://example.com/image.jpg") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 },
                 confirmButton = {
                     TextButton(onClick = {
-                        if (newCatName.isNotBlank()) {
-                            CategoryRepository.addCategory(newCatName) {
+                        if (newCatName.isNotBlank() && newCatImageUrl.isNotBlank()) {
+                            CategoryRepository.addCategory(newCatName, newCatImageUrl) {
                                 newCatName = ""
+                                newCatImageUrl = ""
                                 showAddDialog = false
                             }
                         }
                     }) { Text("THÊM", fontWeight = FontWeight.Bold) }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showAddDialog = false }) { Text("HỦY") }
+                    TextButton(onClick = {
+                        showAddDialog = false
+                        newCatName = ""
+                        newCatImageUrl = ""
+                    }) { Text("HỦY") }
                 }
             )
         }
@@ -96,12 +116,31 @@ fun CategoryItem(category: Category) {
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Row(
-            Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(Icons.Default.Label, contentDescription = null, tint = Color(0xFFD4AF37))
-            Spacer(Modifier.width(16.dp))
-            Text(category.name, Modifier.weight(1f), fontSize = 16.sp)
+            // Hiển thị ảnh danh mục
+            if (category.imageUrl.isNotEmpty()) {
+                AsyncImage(
+                    model = category.imageUrl,
+                    contentDescription = category.name,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Icon(
+                    Icons.AutoMirrored.Filled.Label,
+                    contentDescription = null,
+                    tint = Color(0xFFD4AF37),
+                    modifier = Modifier.size(60.dp)
+                )
+            }
+
+            Text(category.name, Modifier.weight(1f), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+
             IconButton(onClick = { CategoryRepository.deleteCategory(category.id) {} }) {
                 Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red.copy(alpha = 0.6f))
             }

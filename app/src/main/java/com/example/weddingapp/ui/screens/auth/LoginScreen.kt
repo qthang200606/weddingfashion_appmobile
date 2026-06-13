@@ -41,7 +41,7 @@ fun LoginScreen(
     ) {
 
         Text(
-            text = "Eternal Bridal",
+            text = "L'Amour Wedding",
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontFamily = FontFamily.Serif,
                 color = WeddingGold

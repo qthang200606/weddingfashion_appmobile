@@ -413,78 +413,68 @@ fun CheckoutBottomBar(
     paymentMethod: String,
     onConfirm: () -> Unit
 ) {
-
     Surface(
-        shadowElevation = 10.dp,
+        shadowElevation = 16.dp, // Tăng nhẹ đổ bóng để phân tách rõ ràng với nội dung cuộn bên dưới
         color = Color.White
     ) {
-
         Row(
             modifier = Modifier
-                .padding(16.dp)
-                .navigationBarsPadding(),
+                .fillMaxWidth() // QUAN TRỌNG: Thêm dòng này để ép Row giãn hết chiều ngang màn hình
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 12.dp), // Cân đối lại khoảng cách padding hợp lý
 
-            horizontalArrangement =
-                Arrangement.SpaceBetween,
-
-            verticalAlignment =
-                Alignment.CenterVertically
+            horizontalArrangement = Arrangement.SpaceBetween, // Kích hoạt căn đều ra 2 đầu mép biên
+            verticalAlignment = Alignment.CenterVertically
         ) {
-
-            Column {
-
+            // KHỐI THÔNG TIN TỔNG TIỀN (NẰM SÁT MÉP TRÁI)
+            Column(
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(
-                    "Tổng thanh toán",
-                    fontSize = 12.sp,
-                    color = Color.Gray
+                    text = "Tổng thanh toán",
+                    fontSize = 13.sp,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium
                 )
-
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    String.format(
+                    text = String.format(
                         Locale.getDefault(),
                         "%,dđ",
                         totalPrice
                     ),
-
-                    fontSize = 20.sp,
+                    fontSize = 22.sp, // Tăng nhẹ kích thước font để làm nổi bật số tiền cần trả
                     fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFFE91E63)
                 )
             }
 
+            // KHỐI NÚT HÀNH ĐỘNG (NẰM SÁT MÉP PHẢI)
             Button(
                 onClick = onConfirm,
-
                 enabled = enabled,
-
-                shape = RoundedCornerShape(10.dp),
-
+                shape = RoundedCornerShape(12.dp), // Bo tròn góc hiện đại, đồng bộ với các SectionCard
                 modifier = Modifier
-                    .height(48.dp)
-                    .width(180.dp),
-
+                    .height(50.dp) // Tăng chiều cao lên 50dp giúp nút bấm đầy đặn và dễ tương tác hơn
+                    .width(190.dp), // Nới rộng kích thước nút một chút để text "THANH TOÁN QR" không bị kích chữ
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFE91E63)
-                )
+                    containerColor = Color(0xFFE91E63),
+                    disabledContainerColor = Color(0xFFE91E63).copy(alpha = 0.4f) // Trạng thái mờ khi chưa điền đủ info
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
             ) {
-
                 if (isProcessing) {
-
                     CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(22.dp),
                         color = Color.White,
-                        strokeWidth = 2.dp
+                        strokeWidth = 2.5.dp
                     )
-
                 } else {
-
                     Text(
-                        if (paymentMethod == "QR")
-                            "THANH TOÁN QR"
-                        else
-                            "ĐẶT HÀNG",
-
-                        fontWeight = FontWeight.Bold
+                        text = if (paymentMethod == "QR") "THANH TOÁN QR" else "ĐẶT HÀNG",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 15.sp, // Tăng kích thước font chữ trong nút để tăng tính kêu gọi hành động
+                        color = Color.White
                     )
                 }
             }

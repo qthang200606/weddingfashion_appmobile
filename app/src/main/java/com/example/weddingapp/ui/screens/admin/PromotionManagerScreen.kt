@@ -8,10 +8,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Label
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,7 +42,9 @@ fun PromotionManagerScreen(onBack: () -> Unit) {
 
     // --- FORM STATES ---
     var newCatName by remember { mutableStateOf("") }
+    var newCatImageUrl by remember { mutableStateOf("") }
     var editCatName by remember { mutableStateOf("") }
+    var editCatImageUrl by remember { mutableStateOf("") }
     var bTitle by remember { mutableStateOf("") }
     var bUrl by remember { mutableStateOf("") }
     var bTag by remember { mutableStateOf("") }
@@ -94,6 +96,7 @@ fun PromotionManagerScreen(onBack: () -> Unit) {
                         onEdit = {
                             editingCategory = category
                             editCatName = category.name
+                            editCatImageUrl = category.imageUrl
                         },
                         onDelete = { itemToDelete = "Danh mục" to category.id }
                     )
@@ -127,10 +130,19 @@ fun PromotionManagerScreen(onBack: () -> Unit) {
         AlertDialog(
             onDismissRequest = { editingCategory = null },
             title = { Text("Sửa danh mục") },
-            text = { OutlinedTextField(value = editCatName, onValueChange = { editCatName = it }, label = { Text("Tên mới") }) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(value = editCatName, onValueChange = { editCatName = it }, label = { Text("Tên danh mục") })
+                    OutlinedTextField(value = editCatImageUrl, onValueChange = { editCatImageUrl = it }, label = { Text("Link ảnh") })
+                }
+            },
             confirmButton = {
                 TextButton(onClick = {
-                    CategoryRepository.updateCategory(cat.id, editCatName) { editingCategory = null }
+                    if (editCatName.isNotBlank() && editCatImageUrl.isNotBlank()) {
+                        CategoryRepository.updateCategory(cat.id, editCatName, editCatImageUrl) {
+                            editingCategory = null
+                        }
+                    }
                 }) { Text("LƯU") }
             },
             dismissButton = { TextButton(onClick = { editingCategory = null }) { Text("HỦY") } }
@@ -142,12 +154,18 @@ fun PromotionManagerScreen(onBack: () -> Unit) {
         AlertDialog(
             onDismissRequest = { showAddCatDialog = false },
             title = { Text("Thêm danh mục") },
-            text = { OutlinedTextField(value = newCatName, onValueChange = { newCatName = it }, label = { Text("Tên danh mục") }) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(value = newCatName, onValueChange = { newCatName = it }, label = { Text("Tên danh mục") })
+                    OutlinedTextField(value = newCatImageUrl, onValueChange = { newCatImageUrl = it }, label = { Text("Link ảnh") })
+                }
+            },
             confirmButton = {
                 TextButton(onClick = {
-                    if (newCatName.isNotBlank()) {
-                        CategoryRepository.addCategory(newCatName) {
+                    if (newCatName.isNotBlank() && newCatImageUrl.isNotBlank()) {
+                        CategoryRepository.addCategory(newCatName, newCatImageUrl) {
                             newCatName = ""
+                            newCatImageUrl = ""
                             showAddCatDialog = false
                         }
                     }
@@ -174,7 +192,9 @@ fun PromotionManagerScreen(onBack: () -> Unit) {
                     if (bUrl.isNotBlank()) {
                         val nb = PromoBanner(title = bTitle, imageUrl = bUrl, discountTag = bTag, isActive = true)
                         BannerRepository.addBanner(nb) {
-                            bTitle = ""; bUrl = ""; bTag = ""
+                            bTitle = ""
+                            bUrl = ""
+                            bTag = ""
                             showAddBannerDialog = false
                         }
                     }
@@ -211,10 +231,8 @@ fun EmptyBox(message: String) {
 
 @Composable
 fun BannerItemCard(banner: PromoBanner, onToggle: () -> Unit, onDelete: () -> Unit) {
-    // TẠO STATE CỤC BỘ: UI sẽ dùng biến này để hiển thị thay vì đợi Firebase
     var localIsActive by remember { mutableStateOf(banner.isActive) }
 
-    // ĐỒNG BỘ: Nếu dữ liệu từ server thay đổi (ví dụ Admin khác gạt), UI sẽ cập nhật theo
     LaunchedEffect(banner.isActive) {
         localIsActive = banner.isActive
     }
@@ -231,7 +249,6 @@ fun BannerItemCard(banner: PromoBanner, onToggle: () -> Unit, onDelete: () -> Un
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
-                    // Dùng localIsActive để làm mờ ảnh ngay lập tức khi gạt tắt
                     .alpha(if (localIsActive) 1f else 0.4f)
             )
             Column(
@@ -248,13 +265,11 @@ fun BannerItemCard(banner: PromoBanner, onToggle: () -> Unit, onDelete: () -> Un
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(banner.title, color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-
-                    // SWITCH SỬ DỤNG LOCAL STATE
                     Switch(
                         checked = localIsActive,
                         onCheckedChange = {
-                            localIsActive = it // 1. UI đổi ngay lập tức (mượt mà)
-                            onToggle()        // 2. Gọi hàm lưu lên Firebase ngầm
+                            localIsActive = it
+                            onToggle()
                         }
                     )
                 }
@@ -262,6 +277,7 @@ fun BannerItemCard(banner: PromoBanner, onToggle: () -> Unit, onDelete: () -> Un
         }
     }
 }
+
 @Composable
 fun CategoryItemCard(category: Category, onEdit: () -> Unit, onDelete: () -> Unit) {
     Card(
@@ -270,7 +286,7 @@ fun CategoryItemCard(category: Category, onEdit: () -> Unit, onDelete: () -> Uni
         elevation = CardDefaults.cardElevation(1.dp)
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Label, contentDescription = null, tint = Color(0xFFD4AF37))
+            Icon(Icons.AutoMirrored.Filled.Label, contentDescription = null, tint = Color(0xFFD4AF37))
             Spacer(Modifier.width(12.dp))
             Text(category.name, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
             IconButton(onClick = onEdit) { Icon(Icons.Default.Edit, null, tint = Color.Gray) }

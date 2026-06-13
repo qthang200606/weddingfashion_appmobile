@@ -14,6 +14,7 @@ data class Order(
     val shippingProvider: String? = null,
     val paymentMethod: String = "COD", // "COD" hoặc "QR"
     val paymentStatus: String = "UNPAID" // "UNPAID", "PENDING", "PAID"
+
 )
 
 

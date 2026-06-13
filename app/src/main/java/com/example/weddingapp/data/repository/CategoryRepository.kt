@@ -22,14 +22,16 @@ object CategoryRepository {
         awaitClose { subscription.remove() }
     }
 
-    fun addCategory(name: String, onComplete: (Boolean) -> Unit) {
-        val category = Category(name = name)
+    fun addCategory(name: String, imageUrl: String, onComplete: (Boolean) -> Unit) {
+        val category = Category(name = name, imageUrl = imageUrl)
         categoriesCollection.add(category).addOnCompleteListener { onComplete(it.isSuccessful) }
     }
 
-    fun updateCategory(id: String, newName: String, onComplete: (Boolean) -> Unit) {
-        categoriesCollection.document(id).update("name", newName)
-            .addOnCompleteListener { onComplete(it.isSuccessful) }
+    fun updateCategory(id: String, newName: String, imageUrl: String, onComplete: (Boolean) -> Unit) {
+        categoriesCollection.document(id).update(
+            "name", newName,
+            "imageUrl", imageUrl
+        ).addOnCompleteListener { onComplete(it.isSuccessful) }
     }
 
     fun deleteCategory(id: String, onComplete: (Boolean) -> Unit) {

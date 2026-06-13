@@ -11,10 +11,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.clip
+import coil.compose.AsyncImage
 import com.example.weddingapp.data.repository.CategoryRepository
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -22,16 +26,6 @@ import java.nio.charset.StandardCharsets
 @Composable
 fun CategoriesScreen(onCategoryClick: (String, String) -> Unit) {
     val categories by CategoryRepository.getCategories().collectAsState(initial = emptyList())
-
-    // Danh sách các màu gradient sinh động để gán cho từng danh mục
-    val categoryGradients = listOf(
-        androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFFFF9A9E), Color(0xFFFAD0C4))), // Hồng đào
-        androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFFA1C4FD), Color(0xFFC2E9FB))), // Xanh dương pastel
-        androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFFD4FC79), Color(0xFF96E6A1))), // Xanh lá pastel
-        androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFFFFECD2), Color(0xFFFCB69F))), // Cam pastel
-        androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF84FAB0), Color(0xFF8FD3F4))), // Xanh ngọc
-        androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFFE0C3FC), Color(0xFF8EC5FC)))  // Tím pastel
-    )
 
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFFBFBFB))) {
         Text(
@@ -53,7 +47,7 @@ fun CategoriesScreen(onCategoryClick: (String, String) -> Unit) {
             item {
                 ColorCategoryCard(
                     name = "Tất cả",
-                    background = androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFF232526), Color(0xFF414345))),
+                    imageUrl = "",
                     textColor = Color.White,
                     onClick = {
                         val encodedName = URLEncoder.encode("Tất cả", StandardCharsets.UTF_8.toString())
@@ -62,14 +56,12 @@ fun CategoriesScreen(onCategoryClick: (String, String) -> Unit) {
                 )
             }
 
-            // Các danh mục từ Firebase - Gán màu gradient ngẫu nhiên
+            // Các danh mục từ Firebase - Hiển thị ảnh thực tế
             itemsIndexed(categories) { index, category ->
-                // Chọn màu dựa trên index để không bị trùng màu lặp lại
-                val gradient = categoryGradients[index % categoryGradients.size]
-
                 ColorCategoryCard(
                     name = category.name,
-                    background = gradient,
+                    imageUrl = category.imageUrl,
+                    textColor = Color.White,
                     onClick = {
                         val encodedName = URLEncoder.encode(category.name, StandardCharsets.UTF_8.toString())
                         onCategoryClick(category.id, encodedName)
@@ -83,25 +75,57 @@ fun CategoriesScreen(onCategoryClick: (String, String) -> Unit) {
 @Composable
 fun ColorCategoryCard(
     name: String,
-    background: androidx.compose.ui.graphics.Brush,
+    imageUrl: String,
     textColor: Color = Color(0xFF333333),
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(130.dp) // Chiều cao vừa phải, hiện đại
+            .height(130.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(background)
-                .padding(16.dp),
-            contentAlignment = Alignment.Center // Tên danh mục ở giữa
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
+            // Hiển thị ảnh nếu có
+            if (imageUrl.isNotEmpty()) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = name,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                // Fallback gradient cho "Tất cả"
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.linearGradient(listOf(Color(0xFF232526), Color(0xFF414345)))
+                        )
+                )
+            }
+
+            // Overlay gradient để text dễ đọc
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.5f)
+                            ),
+                            startY = 50f
+                        )
+                    )
+            )
+
+            // Tên danh mục
             Text(
                 text = name,
                 color = textColor,

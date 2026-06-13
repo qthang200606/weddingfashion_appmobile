@@ -37,9 +37,6 @@ fun CustomerMainContainer(
                     onLogout = onLogout,
                     onNavigateToCategory = { catId ->
                         rootNavController.navigate("product_list/$catId/Sản phẩm")
-                    },
-                    onNavigateToDetail = { productId ->
-                        rootNavController.navigate("product_detail/$productId")
                     }
                 )
             }
@@ -70,7 +67,7 @@ fun CustomerMainContainer(
 
             composable(CustomerScreen.Orders.route) {
                 OrderHistoryScreen(
-                    onBack = { 
+                    onBack = {
                         navController.navigate(CustomerScreen.Home.route)
                     },
                     onOrderClick = { orderId: String ->
@@ -79,16 +76,16 @@ fun CustomerMainContainer(
                 )
             }
             composable(CustomerScreen.Chat.route){
-              ChatBoxScreen(
-                  currentUserId = currentUserId,
-                  chatId = currentUserId,
-                  onBack = {
-                      navController.navigate(CustomerScreen.Home.route)
-                  },
-                  onNavigateToBooking = {
-                      rootNavController.navigate("booking_screen")
-                  }
-              )
+                ChatBoxScreen(
+                    currentUserId = currentUserId,
+                    chatId = currentUserId,
+                    onBack = {
+                        navController.navigate(CustomerScreen.Home.route)
+                    },
+                    onNavigateToBooking = {
+                        rootNavController.navigate("booking_screen")
+                    }
+                )
             }
             composable(CustomerScreen.AIs.route){
                 WeddingAIScreen(
