@@ -83,6 +83,7 @@ dependencies {
 
     // Image Loading
     implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("com.github.jeziellago:compose-markdown:0.5.0")
 
     // --- MARKDOWN (ĐÃ FIX XUNG ĐỘT) ---
     implementation("com.github.jeziellago:compose-markdown:0.5.0")

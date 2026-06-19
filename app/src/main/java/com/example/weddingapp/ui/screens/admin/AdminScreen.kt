@@ -60,8 +60,8 @@ fun AdminScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                StatCard("chat", "124", Icons.Default.Inventory, Color(0xFF4CAF50), Modifier.weight(1f,),onClick = { onNavigate("admin_chat_list") })
-                StatCard("Lịch hẹn", "12", Icons.Default.CalendarMonth, Color(0xFF2196F3), Modifier.weight(1f),onClick = { onNavigate("appointment_management") })
+                StatCard("chat", value = "", Icons.Default.Inventory, Color(0xFF4CAF50), Modifier.weight(1f,),onClick = { onNavigate("admin_chat_list") })
+                StatCard("Lịch hẹn", value = "", Icons.Default.CalendarMonth, Color(0xFF2196F3), Modifier.weight(1f),onClick = { onNavigate("appointment_management") })
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -80,7 +80,7 @@ fun AdminScreen(
                 item { AdminActionCard("Quản lý danh mục", Icons.AutoMirrored.Filled.FormatListBulleted) { onNavigate("promotion_manager") } }
                 item { AdminActionCard("Quản lý đơn hàng", Icons.Default.CheckCircle) { onNavigate("order_management") } }
                 item { AdminActionCard("Quản lý tồn kho", Icons.Default.Event) { onNavigate("inventory_management") } }
-                item { AdminActionCard("Quản lý banner", Icons.Default.CardGiftcard) { onNavigate("banner_management") } }
+
                 item { AdminActionCard("Thống kê", Icons.Default.Assessment) { onNavigate("statistics") } }
                 item {
                     AdminActionCard("Tin nhắn khách", Icons.Default.Chat) {

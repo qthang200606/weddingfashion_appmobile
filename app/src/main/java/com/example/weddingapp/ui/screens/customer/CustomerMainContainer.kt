@@ -89,6 +89,7 @@ fun CustomerMainContainer(
             }
             composable(CustomerScreen.AIs.route){
                 WeddingAIScreen(
+                    userId = currentUserId,
                     onBack = {
                         navController.navigate(CustomerScreen.Home.route)
                     }

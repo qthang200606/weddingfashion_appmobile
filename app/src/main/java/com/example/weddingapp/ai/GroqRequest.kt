@@ -1,7 +1,5 @@
 package com.example.weddingapp.ai
 
-// File: com.example.weddingapp.ai.GroqRequest.kt
-// File: com.example.weddingapp.ai.GroqRequest.kt
 
 
 data class GroqRequest(
