@@ -229,7 +229,7 @@ This project is developed for educational purposes and portfolio demonstration.
 
 **Ngô Quang Thắng**
 
-- Email: your_email@gmail.com
+- Email: thang93dhp@gmail.com
 - GitHub: https://github.com/qthang200606
 
 ---
